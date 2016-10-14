@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import argparse
 from urllib.parse import urlparse
 from enum import Enum
 from pprint import pprint
@@ -12,7 +13,7 @@ import praw
 
 sp_username = "lbrndnr"
 
-reddit = praw.Reddit(user_agent="web:ch.lbrndnr.rmusic:0.0.1 (by /u/" + REDDIT_USERNAME + ")")
+reddit = praw.Reddit(user_agent="web:ch.lbrndnr.rmusic:0.0.1 (by /u/" + os.environ["REDDIT_USERNAME"] + ")")
 
 class LinkType(Enum):
     unknown = 1
@@ -39,8 +40,8 @@ def retrieve_playlist(sp, user_id, playlist_name):
         total = response["total"]
 
 
-def retrieve_posts():
-    subreddit = reddit.get_subreddit("electronicmusic")
+def retrieve_posts(subreddit):
+    subreddit = reddit.get_subreddit(subreddit)
     posts = subreddit.get_hot()
     songs = [p for p in posts if not p.is_self and p.media is not None]
 
@@ -81,6 +82,11 @@ def get_track_info(name):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Digest music subreddits")
+    parser.add_argument("s", help="the name of the subreddit")
+
+    subreddit = parser.parse_args().s
+
     token = getToken()
     if not token:
         print("Can't get token for " + username)
@@ -88,13 +94,13 @@ if __name__ == "__main__":
 
     sp = spotipy.Spotify(auth=token)
 
-    playlist = retrieve_playlist(sp, sp_username, "r/electronicmusic")
+    playlist = retrieve_playlist(sp, sp_username, "r/" + subreddit)
     saved_tracks = sp.user_playlist_tracks(sp_username, playlist["id"])
 
     last_added_song = None
     tracks = []
 
-    for post in retrieve_posts():
+    for post in retrieve_posts(subreddit):
         post_type = post_link_type(post)
 
         if post_type == LinkType.artist:
