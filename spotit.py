@@ -102,17 +102,23 @@ if __name__ == "__main__":
 
     for post in retrieve_posts(subreddit):
         post_type = post_link_type(post)
-        added = False
+        old_track_len = len(new_tracks)
 
         if post_type == LinkType.artist:
-            print("ITs an artist")
-        elif post_type == LinkType.album:
-            print("It's an album. What now?")
-            # pprint(dir(sp.album_tracks(post.url)))
-        elif post_type == LinkType.track:
-            print("ITs a track")
+            artist_tracks = sp.artist_top_tracks(post.url)
+            if len(artist_tracks) > 0:
+                new_tracks.append(artist.tracks["tracks"][0]["id"])
 
-        if not added:
+        elif post_type == LinkType.album:
+            album_tracks = [t["id"] for t in sp.album_tracks(post.url)["items"]]
+            album_tracks = sorted(sp.tracks(album_tracks)["tracks"], key=lambda track: track["popularity"])
+            if len(album_tracks) > 0:
+                new_tracks.append(album_tracks[0]["id"])
+
+        elif post_type == LinkType.track:
+            new_tracks.append(post.url)
+
+        if old_track_len == len(new_tracks):
             info = get_track_info(post.title)
             if info is not None:
                 query = "artist:" + info[0] + " " + "track:" + info[1]
@@ -130,7 +136,7 @@ if __name__ == "__main__":
     new_tracks = [t for t in new_tracks if t not in all_tracks]
 
     if len(new_tracks) > 0:
-        with open(file_name, "ab") as file:
-            pickle.dump(new_tracks, file)
+        with open(file_name, "wb") as file:
+            pickle.dump(all_tracks + new_tracks, file)
 
         sp.user_playlist_add_tracks(sp_username, playlist["id"], new_tracks)
