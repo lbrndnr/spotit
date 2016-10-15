@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import argparse
+import pickle
 from urllib.parse import urlparse
 from enum import Enum
 from pprint import pprint
@@ -95,27 +96,41 @@ if __name__ == "__main__":
     sp = spotipy.Spotify(auth=token)
 
     playlist = retrieve_playlist(sp, sp_username, "r/" + subreddit)
-    saved_tracks = sp.user_playlist_tracks(sp_username, playlist["id"])
 
     last_added_song = None
-    tracks = []
+    new_tracks = []
 
     for post in retrieve_posts(subreddit):
         post_type = post_link_type(post)
+        added = False
 
         if post_type == LinkType.artist:
             print("ITs an artist")
         elif post_type == LinkType.album:
-            pprint(dir(sp.album_tracks(post.url)))
+            print("It's an album. What now?")
+            # pprint(dir(sp.album_tracks(post.url)))
         elif post_type == LinkType.track:
             print("ITs a track")
-        else:
+
+        if not added:
             info = get_track_info(post.title)
             if info is not None:
                 query = "artist:" + info[0] + " " + "track:" + info[1]
                 results = sp.search(q=query, type="track")["tracks"]["items"]
                 if len(results) > 0:
-                    tracks.append(results[0]["id"])
+                    new_tracks.append(results[0]["id"])
 
-    if len(tracks) > 0:
-        sp.user_playlist_add_tracks(sp_username, playlist["id"], tracks)
+    file_name = "all_tracks.p"
+    try:
+        with open(file_name, "rb") as file:
+            all_tracks = pickle.load(file)
+    except FileNotFoundError:
+            all_tracks = []
+
+    new_tracks = [t for t in new_tracks if t not in all_tracks]
+
+    if len(new_tracks) > 0:
+        with open(file_name, "ab") as file:
+            pickle.dump(new_tracks, file)
+
+        sp.user_playlist_add_tracks(sp_username, playlist["id"], new_tracks)
