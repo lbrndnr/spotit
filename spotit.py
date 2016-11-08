@@ -19,8 +19,8 @@ class LinkType(Enum):
     track = 4
 
 
-def get_token():
-    return util.prompt_for_user_token(sp_username, "playlist-modify-public")
+def get_token(username):
+    return util.prompt_for_user_token(username, "playlist-modify-public")
 
 
 def retrieve_playlist(sp, user_id, playlist_name):
@@ -78,25 +78,14 @@ def get_track_info(name):
         return (info[0].strip(), info[1].strip())
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Digest music subreddits")
-    parser.add_argument("-r", help="the name of the subreddit")
-    parser.add_argument("-su", help="the spotify username")
-    parser.add_argument("-ru", help="the reddit username")
-
-    args = parser.parse_args()
-
-    subreddit = args.r
-    sp_username = args.su
-    re_username = args.ru
-
-    token = get_token()
+def update_playlist(subreddit, sp_username, re_username):
+    token = get_token(sp_username)
     if not token:
         print("Can't get token for " + username)
         sys.exit()
 
     sp = spotipy.Spotify(auth=token)
-    re = praw.Reddit(user_agent="web:ch.lbrndnr.spotit:0.0.1 (by /u/" + re_username + ")")
+    re = praw.Reddit(user_agent="web:ch.laurinbrandner.spotit:0.0.1 (by /u/" + re_username + ")")
 
     playlist = retrieve_playlist(sp, sp_username, "r/" + subreddit)
 
@@ -143,3 +132,18 @@ if __name__ == "__main__":
             pickle.dump(all_tracks + new_tracks, file)
 
         sp.user_playlist_add_tracks(sp_username, playlist["id"], new_tracks)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Digest music subreddits")
+    parser.add_argument("-r", help="the name of the subreddit")
+    parser.add_argument("-su", help="the spotify username")
+    parser.add_argument("-ru", help="the reddit username")
+
+    args = parser.parse_args()
+
+    subreddit = args.r
+    sp_username = args.su
+    re_username = args.ru
+
+    update_playlist(subreddit, sp_username, re_username)
