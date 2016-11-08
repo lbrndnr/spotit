@@ -12,10 +12,6 @@ import spotipy.util as util
 
 import praw
 
-sp_username = "lbrndnr"
-
-reddit = praw.Reddit(user_agent="web:ch.lbrndnr.rmusic:0.0.1 (by /u/" + os.environ["REDDIT_USERNAME"] + ")")
-
 class LinkType(Enum):
     unknown = 1
     artist = 2
@@ -23,7 +19,7 @@ class LinkType(Enum):
     track = 4
 
 
-def getToken():
+def get_token():
     return util.prompt_for_user_token(sp_username, "playlist-modify-public")
 
 
@@ -41,8 +37,8 @@ def retrieve_playlist(sp, user_id, playlist_name):
         total = response["total"]
 
 
-def retrieve_posts(subreddit):
-    subreddit = reddit.get_subreddit(subreddit)
+def retrieve_posts(re, subreddit):
+    subreddit = re.get_subreddit(subreddit)
     posts = subreddit.get_hot()
     songs = [p for p in posts if not p.is_self and p.media is not None]
 
@@ -84,23 +80,30 @@ def get_track_info(name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Digest music subreddits")
-    parser.add_argument("s", help="the name of the subreddit")
+    parser.add_argument("-r", help="the name of the subreddit")
+    parser.add_argument("-su", help="the spotify username")
+    parser.add_argument("-ru", help="the reddit username")
 
-    subreddit = parser.parse_args().s
+    args = parser.parse_args()
 
-    token = getToken()
+    subreddit = args.r
+    sp_username = args.su
+    re_username = args.ru
+
+    token = get_token()
     if not token:
         print("Can't get token for " + username)
         sys.exit()
 
     sp = spotipy.Spotify(auth=token)
+    re = praw.Reddit(user_agent="web:ch.lbrndnr.spotit:0.0.1 (by /u/" + re_username + ")")
 
     playlist = retrieve_playlist(sp, sp_username, "r/" + subreddit)
 
     last_added_song = None
     new_tracks = []
 
-    for post in retrieve_posts(subreddit):
+    for post in retrieve_posts(re, subreddit):
         post_type = post_link_type(post)
         old_track_len = len(new_tracks)
 
