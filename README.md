@@ -1,6 +1,6 @@
 # spotit
 
-[![Playlist: r/electronicmusic](https://img.shields.io/badge/playlist-r/electronicmusic-blue.svg?style=flat)](https://open.spotify.com/user/lbrndnr/playlist/7oLEnqkhkj0UwArKGsx1H4)
+[![Playlist: r/electronicmusic](https://img.shields.io/badge/playlist-r/electronicmusic-blue.svg?style=flat&colorB=1DB955)](https://open.spotify.com/user/lbrndnr/playlist/7oLEnqkhkj0UwArKGsx1H4)
 [![Twitter: @lbrndnr](https://img.shields.io/badge/contact-@lbrndnr-blue.svg?style=flat)](https://twitter.com/lbrndnr)
 [![License](http://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/lbrndnr/ImagePickerSheetController/blob/master/LICENSE)
 
