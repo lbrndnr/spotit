@@ -10,7 +10,7 @@ This is a little experiment. It's a python script that parses a given subreddit 
 This makes it easy to setup a server which does that on a regular basis. I've done so to parse [r/electronicmusic](https://www.reddit.com/r/electronicmusic/). You can follow that [playlist](https://open.spotify.com/user/lbrndnr/playlist/7oLEnqkhkj0UwArKGsx1H4) too of course.
 
 ## Usage
-`python3 -r electronicmusic -su SPOTIFY_USERNAME -ru REDDIT_USERNAME`
+`python3 spotit -r electronicmusic -su SPOTIFY_USERNAME -ru REDDIT_USERNAME`
 
 ## Requirements
 spotit requires `spotipy` and `praw`
