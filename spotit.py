@@ -78,12 +78,7 @@ def get_track_info(name):
         return (info[0].strip(), info[1].strip())
 
 
-def update_playlist(subreddit, sp_username, re_username):
-    token = get_token(sp_username)
-    if not token:
-        print("Can't get token for " + username)
-        sys.exit()
-
+def update_playlist(subreddit, sp_username, re_username, token):
     sp = spotipy.Spotify(auth=token)
     re = praw.Reddit(user_agent="web:ch.laurinbrandner.spotit:0.0.1 (by /u/" + re_username + ")")
 
@@ -146,4 +141,9 @@ if __name__ == "__main__":
     sp_username = args.su
     re_username = args.ru
 
-    update_playlist(subreddit, sp_username, re_username)
+    token = get_token(sp_username)
+    if not token:
+        print("Can't get token for " + username)
+        sys.exit()
+
+    update_playlist(subreddit, sp_username, re_username, token)
