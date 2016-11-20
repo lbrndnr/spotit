@@ -78,7 +78,7 @@ def get_track_info(name):
         return (info[0].strip(), info[1].strip())
 
 
-def update_playlist(subreddit, sp_username, re_username, token):
+def update_playlist(subreddit, sp_username, re_username, token, payload):
     sp = spotipy.Spotify(auth=token)
     re = praw.Reddit(user_agent="web:ch.laurinbrandner.spotit:0.0.1 (by /u/" + re_username + ")")
 
@@ -113,9 +113,8 @@ def update_playlist(subreddit, sp_username, re_username, token):
                 if len(results) > 0:
                     new_tracks.append(results[0]["id"])
 
-    file_name = "all_tracks.p"
     try:
-        with open(file_name, "rb") as file:
+        with open(payload, "rb") as file:
             all_tracks = pickle.load(file)
     except FileNotFoundError:
             all_tracks = []
@@ -123,7 +122,7 @@ def update_playlist(subreddit, sp_username, re_username, token):
     new_tracks = [t for t in new_tracks if t not in all_tracks]
 
     if len(new_tracks) > 0:
-        with open(file_name, "wb") as file:
+        with open(payload, "wb") as file:
             pickle.dump(all_tracks + new_tracks, file)
 
         sp.user_playlist_add_tracks(sp_username, playlist["id"], new_tracks)
@@ -146,4 +145,4 @@ if __name__ == "__main__":
         print("Can't get token for " + username)
         sys.exit()
 
-    update_playlist(subreddit, sp_username, re_username, token)
+    update_playlist(subreddit, sp_username, re_username, token, "alltracks.p")
