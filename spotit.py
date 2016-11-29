@@ -78,9 +78,9 @@ def get_track_info(name):
         return (info[0].strip(), info[1].strip())
 
 
-def update_playlist(subreddit, sp_username, re_username, token, payload):
+def update_playlist(subreddit, sp_username, re_username, re_client_id, re_client_secret, token, payload):
     sp = spotipy.Spotify(auth=token)
-    re = praw.Reddit(user_agent="web:ch.laurinbrandner.spotit:0.0.1 (by /u/" + re_username + ")")
+    re = praw.Reddit(user_agent="web:ch.laurinbrandner.spotit:0.0.1 (by /u/" + re_username + ")", client_id=re_client_id, client_secret=re_client_secret)
 
     playlist = retrieve_playlist(sp, sp_username, "r/" + subreddit)
 
