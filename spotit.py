@@ -1,10 +1,5 @@
-import sys
-import os
-import re
-import argparse
 from urllib.parse import urlparse
 from enum import Enum
-from pprint import pprint
 
 import spotipy
 import spotipy.util as util
@@ -49,6 +44,7 @@ def retrieve_posts(re, subreddit):
 
 def post_link_type(post):
     o = urlparse(post.url)
+
     if "spotify" in o.netloc:
         if "artist" in o.path:
             return LinkType.artist
@@ -86,7 +82,6 @@ def update_playlist(subreddit, re_username, re_client_id, re_client_secret, sp_u
 
     playlist = retrieve_playlist(sp, sp_username, sp_playlist_id)
 
-    last_added_song = None
     new_tracks = []
 
     for post in retrieve_posts(re, subreddit):
@@ -96,7 +91,7 @@ def update_playlist(subreddit, re_username, re_client_id, re_client_secret, sp_u
         if post_type == LinkType.artist:
             artist_tracks = sp.artist_top_tracks(post.url)
             if len(artist_tracks) > 0:
-                new_tracks.append(artist.tracks["tracks"][0]["id"])
+                new_tracks.append(artist_tracks["tracks"][0]["id"])
 
         elif post_type == LinkType.album:
             album_tracks = [t["id"] for t in sp.album_tracks(post.url)["items"]]
@@ -119,23 +114,3 @@ def update_playlist(subreddit, re_username, re_client_id, re_client_secret, sp_u
 
     if len(new_tracks) > 0:
         sp.user_playlist_add_tracks(sp_username, sp_playlist_id, new_tracks)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Digest music subreddits")
-    parser.add_argument("-r", help="the name of the subreddit")
-    parser.add_argument("-su", help="the spotify username")
-    parser.add_argument("-ru", help="the reddit username")
-
-    args = parser.parse_args()
-
-    subreddit = args.r
-    sp_username = args.su
-    re_username = args.ru
-
-    token = get_token(sp_username)
-    if not token:
-        print("Can't get token for " + username)
-        sys.exit()
-
-    update_playlist(subreddit, sp_username, re_username, token, "alltracks.p")
